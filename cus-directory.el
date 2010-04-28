@@ -269,8 +269,9 @@ not contain a call to `custom-set-all'.")
 ;;;###autoload
 (defun custom-save-all ()
   "Save all customizations."
-  (dolist (group (custom-groups))
-    (custom-save-group group)))
+  (let ((groups (custom-groups)))
+    (dolist (group groups)
+      (custom-save-group group groups))))
 
 (defun custom-groups ()
   "Return all customization groups."
@@ -280,17 +281,37 @@ not contain a call to `custom-set-all'.")
 		  (nconc groups (list symbol)))))
     (cdr groups)))
 
-(defun custom-group-options (group)
+(defun custom-option-group (symbol property &optional groups)
+  "Return the main group of SYMBOL.
+PROPERTY has to be `variable-groups' or `face-groups'.
+GROUPS has to be a list of groups or nil."
+  (let ((var-groups (get symbol property))
+	main-group)
+    (or (car var-groups)
+	;; Kludge.  This variable was defined before the modified version
+	;; of `custom-add-to-group', so we need to pick one (or otherwise
+	;; manual edits could easily be lost).  The group that comes first
+	;; after they have been alphabetically sorted is used.
+	(dolist (group (or groups (custom-groups)) main-group)
+	  (when (and (member* symbol (get group 'custom-group) :key 'car)
+		     (or (not main-group)
+			 (string< group main-group)))
+	    (setq main-group group))))))
+
+(defun custom-group-options (group &optional groups)
   "Return all options whose main group is GROUP."
   ;; ??? Why is spec relevant here?  It isn't used in
   ;; `custom-save-variables' and `custom-save-faces'?
+  (unless groups
+    (setq groups (custom-groups)))
   (let ((variables (make-list 1 0))
 	(faces (make-list 1 0)))
     (dolist (elt (get group 'custom-group))
       (let ((symbol (car elt)))
 	(case (cadr elt)
 	  (custom-variable
-	   (when (and (eq (car (get symbol 'variable-groups)) group)
+	   (when (and (eq group (custom-option-group
+				 symbol 'variable-groups groups))
 		      (let ((spec (car-safe (get symbol 'theme-value))))
 			(or (get symbol 'saved-variable-comment)
 			    (if spec
@@ -298,7 +319,8 @@ not contain a call to `custom-set-all'.")
 			      (get symbol 'saved-value)))))
 	     (nconc variables (list symbol))))
 	  (custom-face
-	   (when (and (eq (car (get symbol 'face-groups)) group)
+	   (when (and (eq group (custom-option-group
+				 symbol 'face-groups groups))
 		      (let ((spec (car-safe (get symbol 'theme-face))))
 			(or (get symbol 'saved-face-comment)
 			    (if spec
@@ -308,9 +330,9 @@ not contain a call to `custom-set-all'.")
     (list (sort (cdr variables) 'string<)
 	  (sort (cdr faces) 'string<))))
 
-(defun custom-save-group (group)
+(defun custom-save-group (group &optional groups)
   "Save GROUP's customization in the group-specific custom file."
-  (let* ((options (custom-group-options group))
+  (let* ((options (custom-group-options group groups))
 	 (variables (car options))
 	 (faces (cadr options))
 	 (filename (concat custom-directory (symbol-name group) ".el"))
