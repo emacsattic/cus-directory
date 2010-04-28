@@ -67,7 +67,7 @@ is deleted if it only contains whitespace."
 (eval-when-compile
   (require 'cl))
 
-(defvar custom-commands
+(setq custom-commands
   '(("Set for current session" Custom-set t
      "Apply all settings in this buffer to the current session"
      "index")
@@ -188,7 +188,7 @@ not contain a call to `custom-set-all'.")
   (goto-char (point-min))
   (message "Creating customization setup...done"))
 
-(defvar custom-variable-menu
+(setq custom-variable-menu
   `(("Set for Current Session" custom-variable-set
      (lambda (widget)
        (eq (widget-get widget :custom-state) 'modified)))
@@ -229,15 +229,9 @@ not contain a call to `custom-set-all'.")
        (eq (widget-get widget :custom-form) 'lisp)))
     ("Show Saved Lisp Expression" custom-variable-edit-lisp
      (lambda (widget)
-       (eq (widget-get widget :custom-form) 'edit))))
-  "Alist of actions for the `custom-variable' widget.
-Each entry has the form (NAME ACTION FILTER) where NAME is the name of
-the menu entry, ACTION is the function to call on the widget when the
-menu is selected, and FILTER is a predicate which takes a `custom-variable'
-widget as an argument, and returns non-nil if ACTION is valid on that
-widget.  If FILTER is nil, ACTION is always valid.")
+       (eq (widget-get widget :custom-form) 'edit)))))
 
-(defvar custom-face-menu
+(setq custom-face-menu
   `(("Set for Current Session" custom-face-set)
     ,@(when custom-directory
 	'(("Save for Future Sessions" custom-face-save)))
@@ -263,13 +257,7 @@ widget.  If FILTER is nil, ACTION is always valid.")
        (not (eq (widget-get widget :custom-form) 'all))))
     ("Show Lisp Expression" custom-face-edit-lisp
      (lambda (widget)
-       (not (eq (widget-get widget :custom-form) 'lisp)))))
-  "Alist of actions for the `custom-face' widget.
-Each entry has the form (NAME ACTION FILTER) where NAME is the name of
-the menu entry, ACTION is the function to call on the widget when the
-menu is selected, and FILTER is a predicate which takes a `custom-face'
-widget as an argument, and returns non-nil if ACTION is valid on that
-widget.  If FILTER is nil, ACTION is always valid.")
+       (not (eq (widget-get widget :custom-form) 'lisp))))))
 
 ;;; Reading and writing the custom files.
 
