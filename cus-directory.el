@@ -17,6 +17,9 @@ If there already is an entry for OPTION and WIDGET, nothing is done."
 ;; file contains a call to `custom-set-all'.
 (defvar custom-directory nil)
 
+;; FIXME this shouldn't need to be non-nil at compile time
+(setq custom-directory t)
+
 (defun custom-set-all (&optional directory)
   "Install user customizations of all option values.
 By default customization is loaded from files ending in \".el\" inside
