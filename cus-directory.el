@@ -1,3 +1,57 @@
+;;; cus-directory.el --- save custom groups in seperate files
+
+;; Copyright (C) 2009, 2010  Jonas Bernoulli
+
+;; Author: Jonas Bernoulli <jonas@bernoul.li>
+;; Created: 2009
+;; Updated: 20100717
+;; Version: 0.1alpha
+;; Homepage: https://github.com/tarsius/auto-compile
+;; Keywords: compile, convenience, lisp
+
+;; This file is not part of GNU Emacs.
+
+;; This file is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 3, or (at your option)
+;; any later version.
+
+;; This file is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; Save custom groups in seperate files.
+
+;; Many users seam not to like custom, one reason might be that the
+;; file it writes to save customizations can't really be edited by
+;; hand and at least I would like to do that from time to time.
+
+;; This libary was intented as a first to allow this.  The second
+;; would have been to pretty-print when writing to file.
+
+;; **************************** WARNING ****************************
+;; *                                                               *
+;; *  This package is somewhat usable but it is not finished and   *
+;; *  since I no longer use it this will probably never change.    *
+;; *                                                               *
+;; *  If you are interested feel free to adopt it - orphans lead   *
+;; *  a sad live.                                                  *
+;; *                                                               *
+;; *****************************************************************
+
+;;; Code:
+
+(require 'cus-edit)
+
+(eval-when-compile
+  (require 'cl))
+
 (defun custom-add-to-group (group option widget)
   "To existing GROUP add a new OPTION of type WIDGET.
 If there already is an entry for OPTION and WIDGET, nothing is done."
@@ -66,9 +120,6 @@ is deleted if it only contains whitespace."
   (mapc (lambda (file)
 	  (load file nil t nil t))
 	(directory-files custom-directory t "^[^.]+\.el$")))
-
-(eval-when-compile
-  (require 'cl))
 
 (setq custom-commands
   '(("Set for current session" Custom-set t
@@ -264,7 +315,7 @@ not contain a call to `custom-set-all'.")
 
 ;;; Reading and writing the custom files.
 
-;; remove `custom-file'
+;; removed `custom-file'
 
 ;;;###autoload
 (defun custom-save-all ()
